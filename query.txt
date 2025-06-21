@@ -1,0 +1,27 @@
+Query 1: Total amount spent by each customer
+db.orders.aggregate([
+  { $group: { _id: "$customerId", totalAmountSpent: { $sum: "$amount" } } }
+])
+
+Query 2: Order details with customer info
+db.orders.aggregate([
+  { $lookup: { from: "customers", localField: "customerId", foreignField: "_id", as: "customerInfo" } },
+  { $unwind: "$customerInfo" }
+])
+
+Query 3: Orders with amount > 500
+db.orders.aggregate([
+  { $match: { amount: { $gt: 500 } } }
+])
+
+Query 4: Average order amount per customer
+db.orders.aggregate([
+  { $group: { _id: "$customerId", avgAmount: { $avg: "$amount" } } }
+])
+
+Query 5: Orders with associated customer only
+db.orders.aggregate([
+  { $lookup: { from: "customers", localField: "customerId", foreignField: "_id", as: "customer" } },
+  { $match: { "customer.0": { $exists: true } } },
+  { $unwind: "$customer" }
+])
